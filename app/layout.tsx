@@ -6,6 +6,7 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { AppContact } from "@/components/app-contact"
 import { AuthProvider } from "@/contexts/auth-context"
+import { CartProvider } from "@/contexts/cart-context"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -34,12 +35,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable} antialiased`}>
       <body className="min-h-screen flex flex-col">
-        <AuthProvider>
+       
+        <AuthProvider> 
+          <CartProvider>
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
           <AppContact />
+          </CartProvider>
         </AuthProvider>
+        
       </body>
     </html>
   )
