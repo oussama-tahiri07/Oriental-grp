@@ -48,7 +48,7 @@ export default function AboutPage() {
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80"
           style={{
-            backgroundImage: "url('/placeholder.svg?height=500&width=1200')",
+            backgroundImage: "url('/berber-women.jpg?height=500&width=1200')",
           }}
         />
         <div className="relative z-10 text-center text-white">
@@ -66,7 +66,7 @@ export default function AboutPage() {
               <div key={index} className="text-center">
                 <div className="flex justify-center mb-6">
                   <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                    <value.icon className="h-8 w-8 text-white" />
+                    <value.icon className="h-8 w-8 text-black" />
                   </div>
                 </div>
                 <h3 className="text-xl font-semibold mb-4">{value.title}</h3>

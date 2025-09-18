@@ -7,6 +7,7 @@ import { Footer } from "@/components/footer"
 import { AppContact } from "@/components/app-contact"
 import { AuthProvider } from "@/contexts/auth-context"
 import { CartProvider } from "@/contexts/cart-context"
+import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -37,12 +38,13 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col">
        
         <AuthProvider> 
-          <CartProvider>
           <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <AppContact />
+          <CartProvider>
+            <main className="flex-1">{children}</main>
+            <Toaster />
           </CartProvider>
+          <Footer />
+          <AppContact /> 
         </AuthProvider>
         
       </body>

@@ -1,14 +1,99 @@
 "use client"
 
 import { useAuth } from "@/contexts/auth-context"
+import { useState, useEffect } from "react"
 import { AuthGuard } from "@/components/auth-guard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Users, ShoppingBag, TrendingUp, Settings, Package, MessageSquare } from "lucide-react"
+import { Users, ShoppingBag, TrendingUp, Settings, Package, MessageSquare, FileText } from "lucide-react"
 import Link from "next/link"
+
+interface AnalyticsData {
+  userStats: {
+    total_users: number
+    new_users_30d: number
+    new_users_7d: number
+    admin_users: number
+  }
+  contentStats: {
+    total_products: number
+    featured_products: number
+    total_blog_posts: number
+    published_posts: number
+    total_services: number
+    total_partners: number
+  }
+  contactStats: {
+    total_contacts: number
+    contacts_30d: number
+    unread_contacts: number
+  }
+  monthlyUsers: Array<{ month: string; users: number }>
+  monthlyContacts: Array<{ month: string; contacts: number }>
+  blogByCategory: Array<{ category: string; posts: number }>
+}
+
+const COLORS = ["#3B82F6", "#EF4444", "#10B981", "#F59E0B", "#8B5CF6", "#EC4899"]
 
 function AdminDashboardContent() {
   const { user, logout } = useAuth()
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  
+    useEffect(() => {
+      fetchAnalytics()
+    }, [])
+  
+    const fetchAnalytics = async () => {
+      try {
+        const response = await fetch("/api/admin/analytics")
+        if (response.ok) {
+          const data = await response.json()
+          setAnalytics(data)
+        } else {
+          setError("Failed to fetch analytics data")
+        }
+      } catch (error) {
+        console.error("Error fetching analytics:", error)
+        setError("An error occurred while fetching analytics")
+      } finally {
+        setLoading(false)
+      }
+    }
+  
+    const formatMonth = (dateString: string) => {
+      return new Date(dateString).toLocaleDateString("en-US", {
+        month: "short",
+        year: "2-digit",
+      })
+    }
+  
+    const chartData =
+      analytics?.monthlyUsers.map((item) => ({
+        month: formatMonth(item.month),
+        users: item.users,
+        contacts: analytics.monthlyContacts.find((c) => c.month === item.month)?.contacts || 0,
+      })) || []
+  
+    if (loading) {
+      return <div className="flex justify-center items-center min-h-screen">Loading analytics...</div>
+    }
+  
+    if (error) {
+      return (
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">{error}</p>
+            <Button onClick={fetchAnalytics}>Try Again</Button>
+          </div>
+        </div>
+      )
+    }
+  
+    if (!analytics) {
+      return <div className="flex justify-center items-center min-h-screen">No analytics data available</div>
+    }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -25,6 +110,7 @@ function AdminDashboardContent() {
         </div>
 
         {/* Stats Cards */}
+        {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -32,30 +118,30 @@ function AdminDashboardContent() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">1,234</div>
-              <p className="text-xs text-muted-foreground">+12% from last month</p>
+              <div className="text-2xl font-bold">{analytics.userStats.total_users.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">+{analytics.userStats.new_users_30d} this month</p>
             </CardContent>
           </Card>
 
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Orders</CardTitle>
-              <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Blog Posts</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">856</div>
-              <p className="text-xs text-muted-foreground">+8% from last month</p>
+              <div className="text-2xl font-bold">{analytics.contentStats.published_posts}</div>
+              <p className="text-xs text-muted-foreground">{analytics.contentStats.total_blog_posts} total posts</p>
             </CardContent>
           </Card>
 
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Revenue</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Contact Submissions</CardTitle>
+              <MessageSquare className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$45,231</div>
-              <p className="text-xs text-muted-foreground">+15% from last month</p>
+              <div className="text-2xl font-bold">{analytics.contactStats.total_contacts}</div>
+              <p className="text-xs text-muted-foreground">{analytics.contactStats.unread_contacts} unread</p>
             </CardContent>
           </Card>
 
@@ -65,11 +151,56 @@ function AdminDashboardContent() {
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">24</div>
-              <p className="text-xs text-muted-foreground">Active products</p>
+              <div className="text-2xl font-bold">{analytics.contentStats.total_products}</div>
+              <p className="text-xs text-muted-foreground">{analytics.contentStats.featured_products} featured</p>
             </CardContent>
           </Card>
         </div>
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">4</div>
+              <p className="text-xs text-muted-foreground">+400% from last month</p>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Orders</CardTitle>
+              <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">2</div>
+              <p className="text-xs text-muted-foreground">+200% from last month</p>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Revenue</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">$---</div>
+              <p className="text-xs text-muted-foreground">+0% from last month</p>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Products</CardTitle>
+              <Package className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">2</div>
+              <p className="text-xs text-muted-foreground">Active products</p>
+            </CardContent>
+          </Card>
+        </div> */}
 
         {/* Management Sections */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

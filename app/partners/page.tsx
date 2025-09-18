@@ -7,19 +7,19 @@ export default function PartnersPage() {
   const partnerLogos = [
     {
       name: "Maroc Export",
-      logo: "/placeholder.svg?height=80&width=120",
+      logo: "/unnamed.webp?height=80&width=120",
     },
     {
       name: "Cluster Menara",
-      logo: "/placeholder.svg?height=80&width=120",
+      logo: "/Logo_Cluster_MEnara.webp?height=80&width=120",
     },
     {
       name: "FIMABIO",
-      logo: "/placeholder.svg?height=80&width=120",
+      logo: "/Logo-FIMABIO-400-FondTransparent.webp?height=80&width=120",
     },
     {
-      name: "OSMEX",
-      logo: "/placeholder.svg?height=80&width=120",
+      name: "ASMEX",
+      logo: "/Logo_Asmex.webp?height=80&width=120",
     },
   ]
 
@@ -61,7 +61,7 @@ export default function PartnersPage() {
                   <div className="flex-shrink-0">
                     <div className="w-48 h-48 bg-gray-100 rounded-lg flex items-center justify-center">
                       <img
-                        src="/placeholder.svg?height=192&width=192"
+                        src="/Logo-Association-Bayti-200x300-1.webp?height=192&width=192"
                         alt="BAYTI Association"
                         className="w-full h-full object-contain p-4"
                       />

@@ -14,10 +14,42 @@ import {
 } from "@/components/ui/carousel"
 import { ArrowRight } from "lucide-react"
 
+interface Product {
+  id: number
+  title: string
+  description: string
+  image_path: string
+  color_class?: string
+  is_featured: boolean
+  display_order: number
+}
+
 export default function HomePage() {
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch("/api/products")
+        if (response.ok) {
+          const data = await response.json()
+          setProducts(data)
+        } else {
+          console.error("Failed to fetch products")
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProducts()
+  }, [])
 
   const carouselSlides = [
     {
@@ -60,43 +92,43 @@ export default function HomePage() {
     return () => clearInterval(interval)
   }, [api])
 
-  const products = [
-    {
-      title: "Certified Virgin Argan Oil",
-      description:
-        "This oil works at 100% of natural and everyone is very popular worldwide & very rare oil in the world.",
-      image: "/home-page-1.jpg?height=200&width=200",
-    },
-    {
-      title: "Pure & Certified Organic Virgin and deodorized Argan Oil",
-      description:
-        "For centuries the women of Morocco have been obtained benefits for their youthful faces and lush...",
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      title: "Pure prickly pear seed oil",
-      description:
-        "Prickly pear seed oil is a powerful anti-wrinkle and firming the skin remarkable. The Berber women used the prickly pear oil...",
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      title: "Organic virgin and toasted argan oil",
-      description: "Process of obtaining: First cold pressed Nutritional value: Argan toasted...",
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      title: "Moroccan Black soap",
-      description:
-        "Moroccan black soap is a dark creamy texture which is used to remove toxins from the body and prepare the skin for exfoliation...",
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      title: "Ghassoul",
-      description:
-        "100% natural. Harvested from preserved places, from their pollution, their dried naturally in the sun, then sieved and...",
-      image: "/placeholder.svg?height=200&width=200",
-    },
-  ]
+  // const products = [
+  //   {
+  //     title: "Certified Virgin Argan Oil",
+  //     description:
+  //       "This oil works at 100% of natural and everyone is very popular worldwide & very rare oil in the world.",
+  //     image: "/home-page-1.jpg?height=200&width=200",
+  //   },
+  //   {
+  //     title: "Pure & Certified Organic Virgin and deodorized Argan Oil",
+  //     description:
+  //       "For centuries the women of Morocco have been obtained benefits for their youthful faces and lush...",
+  //     image: "/placeholder.svg?height=200&width=200",
+  //   },
+  //   {
+  //     title: "Pure prickly pear seed oil",
+  //     description:
+  //       "Prickly pear seed oil is a powerful anti-wrinkle and firming the skin remarkable. The Berber women used the prickly pear oil...",
+  //     image: "/placeholder.svg?height=200&width=200",
+  //   },
+  //   {
+  //     title: "Organic virgin and toasted argan oil",
+  //     description: "Process of obtaining: First cold pressed Nutritional value: Argan toasted...",
+  //     image: "/placeholder.svg?height=200&width=200",
+  //   },
+  //   {
+  //     title: "Moroccan Black soap",
+  //     description:
+  //       "Moroccan black soap is a dark creamy texture which is used to remove toxins from the body and prepare the skin for exfoliation...",
+  //     image: "/placeholder.svg?height=200&width=200",
+  //   },
+  //   {
+  //     title: "Ghassoul",
+  //     description:
+  //       "100% natural. Harvested from preserved places, from their pollution, their dried naturally in the sun, then sieved and...",
+  //     image: "/placeholder.svg?height=200&width=200",
+  //   },
+  // ]
 
   const features = [
     {
@@ -105,7 +137,7 @@ export default function HomePage() {
         "Oriental Group offers a branding service for this customers planning to penetrate their local markets, using their own...",
       buttonText: "Read More",
       href: "/about",
-      image: "/placeholder.svg?height=300&width=400",
+      image: "/about us.jpg?height=300&width=400",
     },
     {
       title: "Bottling private label argan oil",
@@ -113,14 +145,14 @@ export default function HomePage() {
         "We have many varieties of bottles and containers at our disposal, of course the client may supply their own...",
       buttonText: "Read More",
       href: "/services",
-      image: "/placeholder.svg?height=300&width=400",
+      image: "/services.jpg?height=300&width=400",
     },
     {
       title: "Our Products",
       description: "Oriental Group is an argan oil and natural cosmetics from Morocco. We are the leading argan oil...",
       buttonText: "Read More",
       href: "/products",
-      image: "/placeholder.svg?height=300&width=400",
+      image: "/products.png?height=1500&width=200",
     },
   ]
 
@@ -200,27 +232,33 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 font-serif">OUR PRODUCTS</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {products.map((product, index) => (
-              <Card key={index} className="bg-slate-700 border-slate-600 hover:bg-slate-600 transition-colors">
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
-                      <img
-                        src={product.image || "/placeholder.svg"}
-                        alt={product.title}
-                        className="w-full h-full object-cover"
-                      />
+          {loading ? (
+            <div className="text-center">
+              <p className="text-gray-300">Loading products...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {products.map((product) => (
+                <Card key={product.id} className="bg-slate-700 border-slate-600 hover:bg-slate-600 transition-colors">
+                  <CardContent className="p-6">
+                    <div className="flex items-start space-x-4">
+                      <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
+                        <img
+                          src={product.image_path || "/placeholder.svg"}
+                          alt={product.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold mb-2 text-green-400">{product.title}</h3>
+                        <p className="text-gray-300 text-sm line-clamp-3">{product.description}</p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold mb-2 text-green-400">{product.title}</h3>
-                      <p className="text-gray-300 text-sm line-clamp-3">{product.description}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -239,7 +277,7 @@ export default function HomePage() {
               <div className="flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-8">
                 <div className="w-32 h-32 flex-shrink-0">
                   <img
-                    src="/placeholder.svg?height=128&width=128"
+                    src="/Logo-Association-Bayti-200x300-1.webp?height=128&width=128"
                     alt="BAYTI Association"
                     className="w-full h-full object-contain"
                   />
@@ -259,10 +297,10 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-center justify-items-center">
-              <img src="/placeholder.svg?height=80&width=120" alt="Maroc Export" className="h-12 object-contain" />
-              <img src="/placeholder.svg?height=80&width=120" alt="Cluster Menara" className="h-12 object-contain" />
-              <img src="/placeholder.svg?height=80&width=120" alt="FIMABIO" className="h-12 object-contain" />
-              <img src="/placeholder.svg?height=80&width=120" alt="OSMEX" className="h-12 object-contain" />
+              <img src="/unnamed.webp?height=80&width=120" alt="Maroc Export" className="h-12 object-contain" />
+              <img src="/Logo_Cluster_MEnara.webp?height=80&width=120" alt="Cluster Menara" className="h-12 object-contain" />
+              <img src="/Logo-FIMABIO-400-FondTransparent.webp?height=80&width=120" alt="FIMABIO" className="h-12 object-contain" />
+              <img src="/Logo_Asmex.webp?height=80&width=120" alt="ASMEX" className="h-12 object-contain" />
             </div>
           </div>
         </div>

@@ -11,7 +11,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     return NextResponse.json(result.rows[0])
   } catch (error) {
-    console.error("Error fetching product:", error)
+    console.error("Database error:", error)
     return NextResponse.json({ error: "Failed to fetch product" }, { status: 500 })
   }
 }
@@ -25,7 +25,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       `UPDATE products 
        SET title = $1, description = $2, image_path = $3, color_class = $4, 
            is_featured = $5, display_order = $6, updated_at = CURRENT_TIMESTAMP
-       WHERE id = $7 RETURNING *`,
+       WHERE id = $7 
+       RETURNING *`,
       [title, description, image_path, color_class, is_featured, display_order, params.id],
     )
 
@@ -35,7 +36,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     return NextResponse.json(result.rows[0])
   } catch (error) {
-    console.error("Error updating product:", error)
+    console.error("Database error:", error)
     return NextResponse.json({ error: "Failed to update product" }, { status: 500 })
   }
 }
@@ -50,7 +51,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     return NextResponse.json({ message: "Product deleted successfully" })
   } catch (error) {
-    console.error("Error deleting product:", error)
+    console.error("Database error:", error)
     return NextResponse.json({ error: "Failed to delete product" }, { status: 500 })
   }
 }

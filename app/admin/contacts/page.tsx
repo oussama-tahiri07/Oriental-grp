@@ -5,7 +5,8 @@ import { AuthGuard } from "@/components/auth-guard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Eye, Trash2, Mail, Phone } from "lucide-react"
+import { Eye, Trash2, Mail, Phone, CheckCircle } from "lucide-react"
+import { ReplyDialog } from "@/components/admin/reply-dialog"
 import Link from "next/link"
 
 interface ContactSubmission {
@@ -17,6 +18,8 @@ interface ContactSubmission {
   message: string
   is_read: boolean
   created_at: string
+  admin_reply?: string
+  replied_at?: string
 }
 
 function ContactManagementContent() {
@@ -97,10 +100,17 @@ function ContactManagementContent() {
                     <CardTitle className="flex items-center gap-2">
                       {contact.name}
                       {!contact.is_read && <Badge className="bg-orange-500">New</Badge>}
+                      {contact.admin_reply && (
+                        <Badge variant="secondary" className="bg-green-100 text-green-800">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Replied
+                        </Badge>
+                      )}
                     </CardTitle>
                     <p className="text-sm text-gray-600 mt-1">{contact.subject}</p>
                   </div>
                   <div className="flex gap-2">
+                    <ReplyDialog contact={contact} onReplySuccess={fetchContacts} />
                     {!contact.is_read && (
                       <Button size="sm" variant="outline" onClick={() => markAsRead(contact.id)}>
                         <Eye className="h-4 w-4" />
@@ -129,6 +139,15 @@ function ContactManagementContent() {
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <p className="text-sm">{contact.message}</p>
                   </div>
+                  {contact.admin_reply && (
+                    <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
+                      <h4 className="font-medium text-green-800 mb-2">Admin Reply:</h4>
+                      <p className="text-sm text-green-700 whitespace-pre-wrap">{contact.admin_reply}</p>
+                      <p className="text-xs text-green-600 mt-2">
+                        Replied on {new Date(contact.replied_at!).toLocaleString()}
+                      </p>
+                    </div>
+                  )}
                   <div className="text-xs text-gray-500">
                     Submitted on {new Date(contact.created_at).toLocaleString()}
                   </div>

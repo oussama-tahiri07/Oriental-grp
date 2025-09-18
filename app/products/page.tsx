@@ -79,7 +79,7 @@ export default function ProductsPage() {
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60"
           style={{
-            backgroundImage: "url('/placeholder.svg?height=400&width=1200')",
+            backgroundImage: "url('/image.png')",
           }}
         />
         <div className="relative z-10 text-center text-white">
@@ -109,12 +109,12 @@ export default function ProductsPage() {
                     )}
                     <div className="w-full h-full rounded-full overflow-hidden border-4 border-gray-100">
                       <img
-                        src={product.image_path || "/placeholder.svg?height=128&width=128&query=organic product"}
+                        src={product.image_path || "/organic-products-display.jpg?height=128&width=128&query=organic product"}
                         alt={product.title}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement
-                          target.src = "/organic-products-display.png"
+                          target.src = "/organic-products-display.jpg"
                         }}
                       />
                     </div>
