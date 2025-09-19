@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Trash2, Edit, Plus, Search, X, Save, Eye, EyeOff } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/contexts/auth-context"
+import { ImageUpload } from "@/components/image-upload"
 
 interface BlogPost {
   id: number
@@ -314,16 +315,16 @@ function BlogManagementContent() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <Label htmlFor="image_path">Image Path</Label>
-                    <Input
-                      id="image_path"
-                      value={formData.image_path}
-                      onChange={(e) => setFormData({ ...formData, image_path: e.target.value })}
-                      placeholder="/images/blog-post.jpg"
-                    />
-                  </div>
+                <div>
+                  <ImageUpload
+                    value={formData.image_path}
+                    onChange={(url) => setFormData({ ...formData, image_path: url })}
+                    label="Blog Post Image"
+                    placeholder="/images/blog-post.jpg"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <Label htmlFor="category_id">Category</Label>
                     <select

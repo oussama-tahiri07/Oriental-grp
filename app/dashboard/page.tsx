@@ -5,9 +5,42 @@ import { AuthGuard } from "@/components/auth-guard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { User, ShoppingBag, Heart, Settings } from "lucide-react"
+import { useState, useEffect } from "react"
+
+interface UserStats {
+  orderCount: number
+  recentOrders: Array<{
+    id: number
+    status: string
+    created_at: string
+    items_count: number
+  }>
+}
 
 function DashboardContent() {
   const { user, logout } = useAuth()
+  const [userStats, setUserStats] = useState<UserStats>({ orderCount: 0, recentOrders: [] })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (user?.email) {
+      fetchUserStats()
+    }
+  }, [user])
+
+  const fetchUserStats = async () => {
+    try {
+      const response = await fetch(`/api/user/stats?email=${encodeURIComponent(user?.email || "")}`)
+      if (response.ok) {
+        const data = await response.json()
+        setUserStats(data)
+      }
+    } catch (error) {
+      console.error("Error fetching user stats:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -42,7 +75,7 @@ function DashboardContent() {
               <ShoppingBag className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{loading ? "..." : userStats.orderCount}</div>
               <p className="text-xs text-muted-foreground">Total orders placed</p>
             </CardContent>
           </Card>
@@ -108,6 +141,42 @@ function DashboardContent() {
               </div>
             </CardContent>
           </Card>
+
+          {userStats.recentOrders.length > 0 && (
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Recent Orders</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {userStats.recentOrders.map((order) => (
+                    <div key={order.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                      <div>
+                        <p className="font-medium">Order #{order.id}</p>
+                        <p className="text-sm text-gray-600">
+                          {order.items_count} item{order.items_count !== 1 ? "s" : ""} •{" "}
+                          {new Date(order.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            order.status === "completed"
+                              ? "bg-green-100 text-green-800"
+                              : order.status === "quoted"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {order.status.replace("_", " ").toUpperCase()}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>

@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Trash2, Edit, Plus, Search, X, Save } from "lucide-react"
 import Link from "next/link"
+import { ImageUpload } from "@/components/image-upload"
 
 interface Product {
   id: number
@@ -234,16 +235,16 @@ function ProductManagementContent() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <Label htmlFor="image_path">Image Path</Label>
-                    <Input
-                      id="image_path"
-                      value={formData.image_path}
-                      onChange={(e) => setFormData({ ...formData, image_path: e.target.value })}
-                      placeholder="/images/product.png"
-                    />
-                  </div>
+                <div>
+                  <ImageUpload
+                    value={formData.image_path}
+                    onChange={(url) => setFormData({ ...formData, image_path: url })}
+                    label="Product Image"
+                    placeholder="/images/product.png"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <Label htmlFor="color_class">Color Class</Label>
                     <select

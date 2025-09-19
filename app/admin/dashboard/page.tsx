@@ -246,6 +246,12 @@ function AdminDashboardContent() {
                     Contact Submissions
                   </Link>
                 </Button>
+                <Button asChild className="w-full justify-start bg-transparent" variant="outline">
+                  <Link href="/admin/orders">
+                    <Package className="mr-2 h-4 w-4" />
+                    Manage Orders
+                  </Link>
+                </Button>
               </div>
             </CardContent>
           </Card>

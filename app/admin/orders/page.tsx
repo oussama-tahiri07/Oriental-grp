@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Trash2, Mail, Phone, Reply, DollarSign, Package } from "lucide-react"
 import Link from "next/link"
 
@@ -29,6 +30,7 @@ interface Order {
 export default function OrderManagementPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
+  const [updatingStatus, setUpdatingStatus] = useState<number | null>(null)
 
   useEffect(() => {
     fetchOrders()
@@ -48,18 +50,57 @@ export default function OrderManagementPage() {
     }
   }
 
+  const updateOrderStatus = async (orderId: number, newStatus: string) => {
+    setUpdatingStatus(orderId)
+    try {
+      const response = await fetch(`/api/admin/orders/${orderId}/status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      })
+
+      if (response.ok) {
+        // Update the local state
+        setOrders(orders.map((order) => (order.id === orderId ? { ...order, status: newStatus } : order)))
+      } else {
+        console.error("Failed to update order status")
+      }
+    } catch (error) {
+      console.error("Error updating order status:", error)
+    } finally {
+      setUpdatingStatus(null)
+    }
+  }
+
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "quote_pending":
-        return <Badge variant="secondary">Quote Pending</Badge>
-      case "quoted":
-        return <Badge className="bg-green-500">Quoted</Badge>
-      case "approved":
-        return <Badge className="bg-blue-500">Approved</Badge>
+      case "pending":
+        return <Badge variant="secondary">Pending</Badge>
+      case "processing":
+        return <Badge className="bg-blue-500">Processing</Badge>
       case "completed":
-        return <Badge className="bg-purple-500">Completed</Badge>
+        return <Badge className="bg-green-500">Completed</Badge>
+      case "cancelled":
+        return <Badge className="bg-red-500">Cancelled</Badge>
       default:
         return <Badge variant="outline">{status}</Badge>
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "text-gray-600"
+      case "processing":
+        return "text-blue-600"
+      case "completed":
+        return "text-green-600"
+      case "cancelled":
+        return "text-red-600"
+      default:
+        return "text-gray-600"
     }
   }
 
@@ -96,6 +137,29 @@ export default function OrderManagementPage() {
                     </p>
                   </div>
                   <div className="flex gap-2">
+                    <Select
+                      value={order.status}
+                      onValueChange={(newStatus) => updateOrderStatus(order.id, newStatus)}
+                      disabled={updatingStatus === order.id}
+                    >
+                      <SelectTrigger className={`w-40 ${getStatusColor(order.status)}`}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending" className="text-gray-600">
+                          Pending
+                        </SelectItem>
+                        <SelectItem value="processing" className="text-green-600">
+                          Processing
+                        </SelectItem>
+                        <SelectItem value="completed" className="text-blue-600">
+                          Completed
+                        </SelectItem>
+                        <SelectItem value="cancelled" className="text-red-600">
+                          Cancelled
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                     <Button size="sm" variant="default" className="bg-green-600 hover:bg-green-700">
                       <Reply className="h-4 w-4 mr-1" />
                       {order.status === "quoted" ? "Update Quote" : "Send Quote"}

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
 
 export async function GET() {
@@ -25,5 +25,18 @@ export async function GET() {
   } catch (error) {
     console.error("Error fetching orders:", error)
     return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const orderId = Number.parseInt(params.id)
+
+    await query("DELETE FROM orders WHERE id = $1", [orderId])
+
+    return NextResponse.json({ message: "order deleted successfully" })
+  } catch (error) {
+    console.error("Error deleting order:", error)
+    return NextResponse.json({ error: "Failed to delete order" }, { status: 500 })
   }
 }
